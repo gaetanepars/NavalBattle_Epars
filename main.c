@@ -1,12 +1,49 @@
+/**
+ * \file      main.c
+ * \author    <GaetanEpars>
+ * \version   <0.1>
+ * \date      <17-12-2020>
+ * \brief     <Simple game of battleship>
+ *
+ * \details    <In this version the user can play, get help, and leave in a bug free environment>
+ */
+
 #include <stdio.h>
+/** \brief realgrid - real map
+ *
+ *
+ */
 int realgrid [10][10]={0};
+
+/** \brief printgrid - Visible map
+ *
+ *
+ */
 char printgrid [10][10];
 
-int tries=0;
+/** \brief attempts - Player's number of attempts
+ *
+ *
+ */
+int attempts=0;
 
+/** \brief coordinateX - Coordinate X
+ *
+ *
+ */
 int coordinateX;
+
+/** \brief coordinateY - Coordinate Y
+ *
+ *
+ */
 int coordinateY;
 
+
+/** \brief emptyBuffer - This function empties the scanf buffer (not made by me)
+ *
+ *
+ */
 void emptyBuffer()
 {
     int c = 0;
@@ -16,6 +53,10 @@ void emptyBuffer()
     }
 }
 
+/** \brief Mapgen - This function generates the real map and prints the visible map
+ *
+ *
+ */
 void Mapgen() {
 
     //real map of the game
@@ -50,16 +91,20 @@ void Mapgen() {
     }
 }
 
+/** \brief Play - This function sets the ships positions, asks the user coordinates and checks what is there
+ *
+ *
+ */
 void Play() {
 
     char usercoordinateX;
-    char usercoordinateY;
+    int usercoordinateY;
 
     realgrid[0][0] = 4; //ship1             hit=1   missed shot=2 sunk ship=3   ship=4    damaged ship=5
     realgrid[0][1] = 4;
 
-    realgrid[2][0] = 4; //ship2
-    realgrid[2][1] = 4;
+    realgrid[8][8] = 4; //ship2
+    realgrid[9][8] = 4;
 
     realgrid[4][0] = 4; //ship3
     realgrid[4][1] = 4;
@@ -77,7 +122,7 @@ void Play() {
         printf("\nPlease choose a coordinate: ");
 
         scanf(" %c", &usercoordinateX);//-32
-        scanf(" %c", &usercoordinateY);
+        scanf(" %d", &usercoordinateY);
 
 
         //if else loops to stop the user from using invalid X coordinate
@@ -85,41 +130,32 @@ void Play() {
             emptyBuffer();
             printf("\nInvalid coordinates!\nPlease choose valid coordinates: ");
             scanf(" %c", &usercoordinateX);
-            scanf(" %c", &usercoordinateY);
+            scanf(" %d", &usercoordinateY);
         }
         while (usercoordinateX>=91 && usercoordinateX<=96){
             emptyBuffer();
             printf("\nInvalid coordinates!\nPlease choose valid coordinates: ");
             scanf(" %c", &usercoordinateX);
-            scanf(" %c", &usercoordinateY);
+            scanf(" %d", &usercoordinateY);
         }
         while (usercoordinateX>123){
             emptyBuffer();
             printf("\nInvalid coordinates!\nPlease choose valid coordinates: ");
             scanf(" %c", &usercoordinateX);
-            scanf(" %c", &usercoordinateY);
+            scanf(" %d", &usercoordinateY);
         }
 
 
         //if else loops to stop the user from using invalid Y coordinate
-        while (usercoordinateY>=0 && usercoordinateY<=47){
+        while (usercoordinateY<0 || usercoordinateY>10){
             emptyBuffer();
             printf("\nInvalid coordinates!\nPlease choose valid coordinates: ");
             scanf(" %c", &usercoordinateX);
-            scanf(" %c", &usercoordinateY);
+            scanf(" %d", &usercoordinateY);
         }
-        while (usercoordinateY>58){
-            emptyBuffer();
-            printf("\nInvalid coordinates!\nPlease choose valid coordinates: ");
-            scanf(" %c", &usercoordinateX);
-            scanf(" %c", &usercoordinateY);
-        }
-
 
         //user coordinates to real coordinates conversion
-        if(usercoordinateY>=48 && usercoordinateY<=57){
-            coordinateY = usercoordinateY - 49;
-        }
+        coordinateY=usercoordinateY-1;
         if (usercoordinateX >= 97 && usercoordinateX <= 122){
             coordinateX=usercoordinateX-97;                         //allow the user to use caps or not
         }
@@ -144,16 +180,14 @@ void Play() {
                 realgrid[coordinateX][coordinateY+1] =5;
             }
             printf("\nYou've hit a ship!\n");
-            tries++;
+            attempts++;
 
             //checks if the coordinates correspond to water and if it does set the point to missed shot (2)
         } else if (realgrid[coordinateX][coordinateY] == 0) {
             realgrid[coordinateX][coordinateY] = 2;
             Mapgen();
             printf("\nYou missed!\n");
-            tries++;
-            printf("\n%d\n", coordinateX);
-            printf("\n%d\n", coordinateY);
+            attempts++;
 
             //checks if the coordinates correspond to a damaged ship and if it does set the ship coordinates to sunk ship (3) and increments the shipcount
         } else if (realgrid[coordinateX][coordinateY] == 5){
@@ -172,38 +206,45 @@ void Play() {
             }
             Mapgen();
             printf("\nYou've sunk a ship!\n");
-            tries++;
+            attempts++;
             shipcount++;
         }
 
             //tells the player that it has already targeted the coordinate
         else if (realgrid[coordinateX][coordinateY] == 3) {
             printf("\nYou've already sunk that ship!\n");
-            tries++;
+            attempts++;
         }else if (realgrid[coordinateX][coordinateY] == 1) {
             printf("\nYou've already hit that part of the ship!\n");
-            tries++;
+            attempts++;
         }
 
     }while (shipcount != 5);
-    printf("\nYou won !  (%d attempts)\n", tries);
+    printf("\nYou won !  (%d attempts)\n", attempts);
     emptyBuffer();
     printf("\nDo you want to go back to the menu?     (1=Yes 0=No)\n");
 }
 
 
 
-
+/** \brief Help - This function shows tips to the player
+ *
+ *
+ */
 void Help(){                                //show rules and possibly tips
 
-    printf("\nhelp1\n");
-    printf("help2\n");
-    printf("help3\n");
-    printf("help4\n");
-    printf("help5\n");
-    printf("Menu=>1 Exit=>0\n");
+    printf("\nHELP PANEL\n");
+    printf("\n This is a simple Battleship game, you play by giving coordinates to the console.");
+    printf("\nTo sink a ship you need to hit the two coordinates.");
+    printf("\nThere is a total of 5 ships and the game ends when all ships have been sunk.");
+    printf("\n'~' = Water || '=' = Missed shot || '*' = Ship hit || 'X' = Sunken ship");
+    printf("(Menu=1  Exit=0)\n");
 }
 
+/** \brief main - This function is the main menu and base of the program
+ *\return int
+ *
+ */
 int main() {                                //menu
 
     int usermenuchoice;
