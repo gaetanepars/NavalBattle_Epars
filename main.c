@@ -2,10 +2,21 @@
 int realgrid [10][10]={0};
 char printgrid [10][10];
 
+int tries=0;
+
 int coordinateX;
 int coordinateY;
 
-int Mapgen() {
+void emptyBuffer()
+{
+    int c = 0;
+    while (c != '\n' && c != EOF)
+    {
+        c = getchar();
+    }
+}
+
+void Mapgen() {
 
     //real map of the game
     for (int row = 0; row < 10; ++row) {
@@ -39,7 +50,7 @@ int Mapgen() {
     }
 }
 
-int Play() {
+void Play() {
 
     char usercoordinateX;
     char usercoordinateY;
@@ -70,17 +81,20 @@ int Play() {
 
 
         //if else loops to stop the user from using invalid X coordinate
-        if (usercoordinateX>=0 && usercoordinateX<=64){
+        while (usercoordinateX>=0 && usercoordinateX<=64){
+            emptyBuffer();
             printf("\nInvalid coordinates!\nPlease choose valid coordinates: ");
             scanf(" %c", &usercoordinateX);
             scanf(" %c", &usercoordinateY);
         }
-        else if (usercoordinateX>=91 && usercoordinateX<=96){
+        while (usercoordinateX>=91 && usercoordinateX<=96){
+            emptyBuffer();
             printf("\nInvalid coordinates!\nPlease choose valid coordinates: ");
             scanf(" %c", &usercoordinateX);
             scanf(" %c", &usercoordinateY);
         }
-        else if (usercoordinateX>123){
+        while (usercoordinateX>123){
+            emptyBuffer();
             printf("\nInvalid coordinates!\nPlease choose valid coordinates: ");
             scanf(" %c", &usercoordinateX);
             scanf(" %c", &usercoordinateY);
@@ -88,12 +102,14 @@ int Play() {
 
 
         //if else loops to stop the user from using invalid Y coordinate
-        if (usercoordinateY>=0 && usercoordinateY<=47){
+        while (usercoordinateY>=0 && usercoordinateY<=47){
+            emptyBuffer();
             printf("\nInvalid coordinates!\nPlease choose valid coordinates: ");
             scanf(" %c", &usercoordinateX);
             scanf(" %c", &usercoordinateY);
         }
-        else if (usercoordinateY>58){
+        while (usercoordinateY>58){
+            emptyBuffer();
             printf("\nInvalid coordinates!\nPlease choose valid coordinates: ");
             scanf(" %c", &usercoordinateX);
             scanf(" %c", &usercoordinateY);
@@ -128,12 +144,14 @@ int Play() {
                 realgrid[coordinateX][coordinateY+1] =5;
             }
             printf("\nYou've hit a ship!\n");
+            tries++;
 
             //checks if the coordinates correspond to water and if it does set the point to missed shot (2)
         } else if (realgrid[coordinateX][coordinateY] == 0) {
             realgrid[coordinateX][coordinateY] = 2;
             Mapgen();
             printf("\nYou missed!\n");
+            tries++;
             printf("\n%d\n", coordinateX);
             printf("\n%d\n", coordinateY);
 
@@ -154,25 +172,29 @@ int Play() {
             }
             Mapgen();
             printf("\nYou've sunk a ship!\n");
+            tries++;
             shipcount++;
         }
 
             //tells the player that it has already targeted the coordinate
         else if (realgrid[coordinateX][coordinateY] == 3) {
             printf("\nYou've already sunk that ship!\n");
+            tries++;
         }else if (realgrid[coordinateX][coordinateY] == 1) {
             printf("\nYou've already hit that part of the ship!\n");
+            tries++;
         }
 
     }while (shipcount != 5);
-    printf("\nYou won !\n");
-    printf("\nDo you want to go back to the menu?      (1=Yes 0=No)\n");
+    printf("\nYou won !  (%d attempts)\n", tries);
+    emptyBuffer();
+    printf("\nDo you want to go back to the menu?     (1=Yes 0=No)\n");
 }
 
 
 
 
-int Help(){                                //show rules and possibly tips
+void Help(){                                //show rules and possibly tips
 
     printf("\nhelp1\n");
     printf("help2\n");
@@ -195,27 +217,55 @@ int main() {                                //menu
         printf("2.Help\n");
         printf("3.Exit\n");
 
+
         scanf("%d", &usermenuchoice);
 
         //switch that allows the user to choose between the different options in the menu
         switch (usermenuchoice) {
             case 1:
+                emptyBuffer();
                 Mapgen();
                 Play();
                 scanf("%d", &exitloop);
+
+                while (exitloop<0||exitloop>1){
+                    emptyBuffer();
+                    printf("\nInvalid command!  (Menu=1  Exit=0)\nPlease enter a valid command: ");
+                    scanf("%d", &exitloop);
+                }
                 break;
             case 2:
+                emptyBuffer();
                 Help();
                 scanf("%d", &exitloop);
+
+                while (exitloop<0||exitloop>1){
+                    emptyBuffer();
+                    printf("\nInvalid command!  (Menu=1  Exit=0)\nPlease enter a valid command: ");
+                    scanf("%d", &exitloop);
+                }
                 break;
             case 3:
+                emptyBuffer();
                 printf("Are you sure you want to exit? (1=NO 0=YES)\n");
                 scanf("%d", &exitloop);
+
+                while (exitloop<0||exitloop>1){
+                    emptyBuffer();
+                    printf("\nInvalid command!  (Menu=1  Exit=0)\nPlease enter a valid command: ");
+                    scanf("%d", &exitloop);
+                }
                 break;
             default:
-                printf("Incorrect command\n");
-                printf("Would you like to continue? (1=NO 0=YES)\n");
+                emptyBuffer();
+                printf("\nInvalid command!  (Menu=1  Exit=0)\nPlease enter a valid command: ");
                 scanf("%d", &exitloop);
+
+                while (exitloop<0||exitloop>1){
+                    emptyBuffer();
+                    printf("\nInvalid command!  (Menu=1  Exit=0)\nPlease enter a valid command: ");
+                    scanf("%d", &exitloop);
+                }
         }
 
     } while (exitloop != 0);
