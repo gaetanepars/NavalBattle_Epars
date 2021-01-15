@@ -12,11 +12,12 @@
 #include <stdbool.h>
 #include <windows.h>
 
+#define SCORE_SIZE 1000
 
 char usercoordinateX;
 int usercoordinateY;
 
-char username;
+char username [20];
 
 
 /** \brief realgrid - real map
@@ -105,8 +106,21 @@ void emptyBuffer() {
 }
 
 void Username(){
-    printf("Please choose a username: ");
+    printf("\nPlease choose a username: \n");
     scanf("%s", &username);
+}
+
+void Score(){
+    FILE *fPtr;
+    fPtr = fopen("scores.txt", "w");
+    if(fPtr == NULL){
+        printf("impossible de créer le fichier score.\n");
+        exit(EXIT_FAILURE);
+    }
+    for (i = 0; str[i] != '\n'; i++) {
+        fputc(str[i], fptr);
+    }
+    fclose(fPtr);
 }
 
 /** \brief Mapgen - This function generates the real map and prints the visible map
@@ -586,7 +600,8 @@ int main() {                                //menu
 
         printf("1.Jouer\n");
         printf("2.Aide\n");
-        printf("3.Quitter\n");
+        printf("3.Score\n");
+        printf("4.Quitter\n");
 
 
         scanf("%d", &usermenuchoice);
@@ -595,6 +610,7 @@ int main() {                                //menu
         switch (usermenuchoice) {
             case 1:
                 emptyBuffer();
+                Username();
                 Init();
                 Mapgen();
                 Play();
@@ -618,6 +634,17 @@ int main() {                                //menu
                 }
                 break;
             case 3:
+                emptyBuffer();
+                //Score();
+                scanf("%d", &exitloop);
+
+                while (exitloop < 0 || exitloop > 1) {
+                    emptyBuffer();
+                    printf("\nCommande invalide!  (Menu=1  Quitter=0)\nVeuillez entrer une commande valide: ");
+                    scanf("%d", &exitloop);
+                }
+                break;
+            case 4:
                 emptyBuffer();
                 printf("Êtes-vous sûr de vouloir quitter? (1=Non 0=Oui)\n");
                 scanf("%d", &exitloop);
