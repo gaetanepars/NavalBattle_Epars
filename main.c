@@ -38,6 +38,8 @@ char printgrid[10][10];
  */
 int attempts = 0;
 
+int score = 0;
+
 /** \brief coordinateX - Coordinate X
  *
  *
@@ -111,17 +113,16 @@ void Username(){
 }
 
 void Score(){
+    score=attempts;
     FILE *fPtr;
     fPtr = fopen("scores.txt", "w");
     if(fPtr == NULL){
         printf("impossible de créer le fichier score.\n");
         exit(EXIT_FAILURE);
     }
-    for (i = 0; str[i] != '\n'; i++) {
-        fputc(str[i], fptr);
-    }
+    fprintf(fPtr, "%s %d", username, score);
     fclose(fPtr);
-}
+    }
 
 /** \brief Mapgen - This function generates the real map and prints the visible map
  *
@@ -596,6 +597,7 @@ int main() {                                //menu
 
 //do while that allows the user to go back to the menu or exit the game
     do {
+        Init();
         printf("\nBataille Navale\n");
 
         printf("1.Jouer\n");
@@ -635,7 +637,7 @@ int main() {                                //menu
                 break;
             case 3:
                 emptyBuffer();
-                //Score();
+                Score();
                 scanf("%d", &exitloop);
 
                 while (exitloop < 0 || exitloop > 1) {
