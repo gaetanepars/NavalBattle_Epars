@@ -12,8 +12,6 @@
 #include <stdbool.h>
 #include <windows.h>
 
-#define SCORE_SIZE 1000
-
 char usercoordinateX;
 int usercoordinateY;
 
@@ -112,17 +110,49 @@ void Username(){
     scanf("%s", &username);
 }
 
-void Score(){
+void Writescore(){
     score=attempts;
     FILE *fPtr;
-    fPtr = fopen("scores.txt", "w");
+    fPtr = fopen("../Scores/scores.txt", "a");
     if(fPtr == NULL){
         printf("impossible de créer le fichier score.\n");
         exit(EXIT_FAILURE);
     }
-    fprintf(fPtr, "%s %d", username, score);
+    fprintf(fPtr, "%s %d \n", username, score);
     fclose(fPtr);
     }
+
+void Showscore(){
+
+        FILE* fptr = NULL;
+        int actual_character = 0;
+
+        fptr = fopen("../Scores/scores.txt", "r");
+
+        if (fptr != NULL){
+            do
+            {
+                actual_character = fgetc(fptr);
+                printf("%c", actual_character);
+            }
+            while (actual_character != EOF);
+            fclose(fptr);
+        }
+    }
+
+void Deletescore(){
+        FILE* fptr = NULL;
+        fptr = fopen("../Scores/scores.txt", "w");
+        fclose(fptr);
+}
+
+void Log(){
+    FILE* fptr = NULL;
+    fptr = fopen("../Logs/log.txt", "a");
+
+
+    fclose(fptr);
+}
 
 /** \brief Mapgen - This function generates the real map and prints the visible map
  *
@@ -536,6 +566,7 @@ void Play() {
 
     } while (allshipsunk != true);
     printf("\nVous avez gagné !  (%d tentatives)\n", attempts);
+    Writescore();
     emptyBuffer();
     printf("\nDésirez-vous retourner au menu principal?     (1=Oui 0=Non)\n");
 }
@@ -569,6 +600,8 @@ void Init() {
 
     realgrid[ship5p1x][ship5p1y] = 5;
     realgrid[ship5p2x][ship5p2y] = 5;
+
+    score=0;
 }
 
 /** \brief Help - This function shows tips to the player
@@ -603,7 +636,9 @@ int main() {                                //menu
         printf("1.Jouer\n");
         printf("2.Aide\n");
         printf("3.Score\n");
-        printf("4.Quitter\n");
+        printf("4.Effacer les scores\n");
+        printf("5.Afficher le Log\n");
+        printf("5.Quitter\n");
 
 
         scanf("%d", &usermenuchoice);
@@ -637,7 +672,8 @@ int main() {                                //menu
                 break;
             case 3:
                 emptyBuffer();
-                Score();
+                Showscore();
+                printf("Voulez-vous retourner au menu?  (1=Oui  0=Non)\n");
                 scanf("%d", &exitloop);
 
                 while (exitloop < 0 || exitloop > 1) {
@@ -647,6 +683,24 @@ int main() {                                //menu
                 }
                 break;
             case 4:
+                emptyBuffer();
+                Deletescore();
+                printf("Tous les scores ont été effacés!\n");
+                exitloop=1;
+                break;
+            case 5:
+                emptyBuffer();
+                Log();
+                printf("Voulez-vous retourner au menu? (1=Oui 0=Non)\n");
+                scanf("%d", &exitloop);
+
+                while (exitloop < 0 || exitloop > 1) {
+                    emptyBuffer();
+                    printf("\nCommande invalide!  (Menu=1  Quitter=0)\nVeuillez entrer une commande valide: ");
+                    scanf("%d", &exitloop);
+                }
+                break;
+            case 6:
                 emptyBuffer();
                 printf("Êtes-vous sûr de vouloir quitter? (1=Non 0=Oui)\n");
                 scanf("%d", &exitloop);
