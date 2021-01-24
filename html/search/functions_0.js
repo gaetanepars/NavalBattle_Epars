@@ -1,8 +1,5 @@
 var searchData=
 [
-  ['_5f_5fhas_5finclude_142',['__has_include',['../_c_make_cache_8txt.html#a15033d43fd4881ecb41d0a9ef3f98c8b',1,'CMakeCache.txt']]],
-  ['_5f_5fhas_5finclude_5f_5f_143',['__has_include__',['../_c_make_cache_8txt.html#a97e2b5b7d48e0c704f01b437bbb41bc3',1,'CMakeCache.txt']]],
-  ['_5f_5fhas_5finclude_5fnext_144',['__has_include_next',['../_c_make_cache_8txt.html#a6bc72b80bcdbfe30be5d38536affde6f',1,'CMakeCache.txt']]],
-  ['_5f_5fhas_5finclude_5fnext_5f_5f_145',['__has_include_next__',['../_c_make_cache_8txt.html#ac96b06945e62d6ea6764b6d86745ec26',1,'CMakeCache.txt']]],
-  ['_5f_5fintmax_5fc_146',['__INTMAX_C',['../_c_make_cache_8txt.html#a2f10a19f2682f0eb61615edae3fa69ef',1,'CMakeCache.txt']]]
+  ['clearlogs_17',['Clearlogs',['../main_8c.html#a8d1fe40d534692d47f1da106b88e21f9',1,'main.c']]],
+  ['clearscore_18',['Clearscore',['../main_8c.html#aaaad475ff9f783a61695ba6b4f4a4e71',1,'main.c']]]
 ];

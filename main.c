@@ -11,81 +11,34 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <windows.h>
+#include <time.h>
 
 char usercoordinateX;
 int usercoordinateY;
-
 char username [20];
+char currentchar;
+int currentint;
+int i,j;
+int boat1hit=0;
+int boat2hit=0;
+int boat3hit=0;
+int boat4hit=0;
+int boat5hit=0;
 
+int realgrid[10][10];
 
-/** \brief realgrid - real map
- *
- *
- */
-int realgrid[10][10] = {0};
-
-/** \brief printgrid - Visible map
- *
- *
- */
 char printgrid[10][10];
 
-/** \brief attempts - Player's number of attempts
- *
- *
- */
 int attempts = 0;
 
 int score = 0;
 
-/** \brief coordinateX - Coordinate X
- *
- *
- */
+int logtype = 0;
+
+
 int coordinateX;
 
-/** \brief coordinateY - Coordinate Y
- *
- *
- */
 int coordinateY;
-
-int ship1p1x = 0;
-int ship1p1y = 0;
-int ship1p2x = 0;
-int ship1p2y = 1;
-
-int ship2p1x = 1;
-int ship2p1y = 0;
-int ship2p2x = 1;
-int ship2p2y = 1;
-int ship2p3x = 1;
-int ship2p3y = 2;
-
-int ship3p1x = 2;
-int ship3p1y = 0;
-int ship3p2x = 2;
-int ship3p2y = 1;
-int ship3p3x = 2;
-int ship3p3y = 2;
-int ship3p4x = 2;
-int ship3p4y = 3;
-
-int ship4p1x = 3;
-int ship4p1y = 0;
-int ship4p2x = 3;
-int ship4p2y = 1;
-int ship4p3x = 3;
-int ship4p3y = 2;
-int ship4p4x = 3;
-int ship4p4y = 3;
-int ship4p5x = 3;
-int ship4p5y = 4;
-
-int ship5p1x = 4;
-int ship5p1y = 0;
-int ship5p2x = 4;
-int ship5p2y = 1;
 
 bool ship1sunk = false;
 bool ship2sunk = false;
@@ -104,12 +57,18 @@ void emptyBuffer() {
         c = getchar();
     }
 }
-
+/** \brief Username - This function asks for the user to input a username
+ *
+ *
+ */
 void Username(){
     printf("\nPlease choose a username: \n");
     scanf("%s", &username);
 }
-
+/** \brief Writescore - This function opens the score file and appends the current username and score
+ *
+ *
+ */
 void Writescore(){
     score=attempts;
     FILE *fPtr;
@@ -121,7 +80,10 @@ void Writescore(){
     fprintf(fPtr, "%s %d \n", username, score);
     fclose(fPtr);
     }
-
+/** \brief Showscore - This function reads and displays the content of the score file
+ *
+ *
+ */
 void Showscore(){
 
         FILE* fptr = NULL;
@@ -139,18 +101,83 @@ void Showscore(){
             fclose(fptr);
         }
     }
-
-void Deletescore(){
+/** \brief Clearscore - This function clears the content of the score file using the writing mode to overwrite it
+ *
+ *
+ */
+void Clearscore(){
         FILE* fptr = NULL;
         fptr = fopen("../Scores/scores.txt", "w");
         fclose(fptr);
 }
-
+/** \brief Log - This function uses a switch to input the correct data with date and time into the log file
+ *
+ *
+ */
 void Log(){
+    time_t t;
+    time(&t);
     FILE* fptr = NULL;
     fptr = fopen("../Logs/log.txt", "a");
+    switch (logtype) {
+        case 1:
+            fprintf(fptr, "Game launched - %s\n", ctime(&t));
+            break;
+        case 2:
+            fprintf(fptr, "User logged in as %s - %s\n", username, ctime(&t));
+            break;
 
+        case 3:
+            fprintf(fptr, "%s launched an attack on coordinate %c%d - %s\n", username, usercoordinateX, usercoordinateY, ctime(&t));
+            break;
+        case 4:
+            fprintf(fptr, "%s has hit a ship - %s\n", username, ctime(&t));
+            break;
+        case 5:
+            fprintf(fptr, "%s missed a shot - %s\n", username, ctime(&t));
+            break;
 
+        case 6:
+            fprintf(fptr, "%s sunk a ship - %s\n", username, ctime(&t));
+            break;
+
+        case 7:
+            fprintf(fptr, "%s is victorious with a score of %d - %s\n", username, score, ctime(&t));
+            break;
+        case 8:
+            fprintf(fptr, "Game closed - %s\n", ctime(&t));
+            break;
+    }
+
+    fclose(fptr);
+}
+/** \brief Showlog - This function displays the content of the log file
+ *
+ *
+ */
+void Showlog(){
+    FILE* fptr = NULL;
+    int actual_character = 0;
+
+    fptr = fopen("../Logs/log.txt", "r");
+
+    if (fptr != NULL){
+        do
+        {
+            actual_character = fgetc(fptr);
+            printf("%c", actual_character);
+        }
+        while (actual_character != EOF);
+        fclose(fptr);
+    }
+}
+/** \brief Clearlog - This function clears the content of the log file using the writing mode to overwrite it
+ *
+ *
+ */
+void Clearlogs(){
+    FILE* fptr = NULL;
+    fptr = fopen("../Logs/log.txt", "w");
     fclose(fptr);
 }
 
@@ -180,50 +207,104 @@ void Mapgen() {
                 printgrid[row][column] = '~';
             } else if (realgrid[row][column] == 6) {
                 printgrid[row][column] = '=';
-            } else if (realgrid[row][column] == 7) {
+            } else if (realgrid[row][column] == 7 || realgrid[row][column] == 8 || realgrid[row][column] == 9 ||
+                       realgrid[row][column] == 10 || realgrid[row][column] == 11) {
                 printgrid[row][column] = '*';
-            } else if (realgrid[row][column] == 8) {
+            } else if (realgrid[row][column] == 12 || realgrid[row][column] == 13 || realgrid[row][column] == 14 ||
+                       realgrid[row][column] == 15) {
                 printgrid[row][column] = 'X';
             }
             printf(" %3c", printgrid[row][column]);
         }
         printf("\n");
     }
+    }
+
+void Txtfileconverter(){
+    currentint = currentchar -'0';
+    if(currentchar!='\n'){
+        realgrid[i][j] = currentint;
+        j++;
+        if (j==10){
+            j=0;
+            i++;
+        }
+    }
 }
+/** \brief Mapselector - This function uses a random number switch to choose a map and then copies the content of the map file to the real grid
+ *
+ *
+ */
+void Mapselector(){
+    FILE *fptr;
+    srand(time(NULL));
+    int r = rand()%3;
+    i=0;
+    j=0;
+
+
+    switch (r) {
+        case 1:
+        fptr=fopen("../Maps/Map1.txt", "r");
+            if (fptr != NULL){
+                do {
+                    currentchar=getc(fptr);
+                    Txtfileconverter();
+                } while (currentchar!=EOF);
+
+            }
+            else{
+                printf("Impossible d'ouvrir le fichier\n");
+            }
+            fclose(fptr);
+            break;
+        case 2:
+            fptr=fopen("../Maps/Map2.txt", "r");
+            if (fptr != NULL){
+                do {
+                    currentchar=getc(fptr);
+                    Txtfileconverter();
+                } while (currentchar!=EOF);
+
+            }
+            else{
+                printf("Impossible d'ouvrir le fichier\n");
+            }
+            fclose(fptr);
+            break;
+        case 3:
+            fptr=fopen("../Maps/Map3.txt", "r");
+            if (fptr != NULL){
+                do {
+                    currentchar=getc(fptr);
+                    Txtfileconverter();
+                } while (currentchar!=EOF);
+
+            }
+            else{
+                printf("Impossible d'ouvrir le fichier\n");
+            }
+            fclose(fptr);
+            break;
+
+    }
+}
+
 
 /** \brief Play - This function sets the ships positions, asks the user coordinates and checks what is there
  *
  *
  */
 void Play() {
-    realgrid[ship1p1x][ship1p1y] = 1; //ship1             hit=1   missed shot=2 sunk ship=3   ship=4    damaged ship=5
-    realgrid[ship1p2x][ship1p2y] = 1;
-
-    realgrid[ship2p1x][ship2p1y] = 2; //ship2
-    realgrid[ship2p2x][ship2p2y] = 2;
-    realgrid[ship2p3x][ship2p3y] = 2;
-
-    realgrid[ship3p1x][ship3p1y] = 3; //ship3
-    realgrid[ship3p2x][ship3p2y] = 3;
-    realgrid[ship3p3x][ship3p3y] = 3;
-    realgrid[ship3p4x][ship3p4y] = 3;
-
-    realgrid[ship4p1x][ship4p1y] = 4; //ship4
-    realgrid[ship4p2x][ship4p2y] = 4;
-    realgrid[ship4p3x][ship4p3y] = 4;
-    realgrid[ship4p4x][ship4p4y] = 4;
-    realgrid[ship4p5x][ship4p5y] = 4;
-
-    realgrid[ship5p1x][ship5p1y] = 5; //ship5
-    realgrid[ship5p2x][ship5p2y] = 5;
-
-
 //do while that allows the game to continue until every ship is sunk
     do {
         printf("\nVeuillez entrer des coordonnées: ");
 
         scanf(" %c", &usercoordinateX);//-32
         scanf(" %d", &usercoordinateY);
+
+        logtype=3;
+        Log();
 
 
 //if else loops to stop the user from using invalid X coordinate
@@ -271,306 +352,190 @@ void Play() {
             realgrid[coordinateX][coordinateY] = 6;
             Mapgen();
             printf("\nRaté!\n");
+            logtype=5;
+            Log();
             attempts++;
         }
 //Mechanics ship1
-        if (realgrid[coordinateX][coordinateY] == realgrid[ship1p1x][ship1p1y] && realgrid[ship1p1x][ship1p1y] == 1) {
-            realgrid[ship1p1x][ship1p1y] = 7;
+        if (realgrid[coordinateX][coordinateY] == 1) {
+            realgrid[coordinateX][coordinateY] = 7;
             Mapgen();
             printf("\nTouché!\n");
+            logtype=4;
+            Log();
             attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship1p2x][ship1p2y] &&
-                   realgrid[ship1p2x][ship1p2y] == 1) {
-            realgrid[ship1p2x][ship1p2y] = 7;
-            Mapgen();
-            printf("\nTouché!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship1p1x][ship1p1y] &&
-                   realgrid[ship1p1x][ship1p1y] == 7 && ship1sunk == false) {
-            printf("\nVous avez déjà endommagé cette partie du navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship1p2x][ship1p2y] &&
-                   realgrid[ship1p2x][ship1p2y] == 7 && ship1sunk == false) {
+            boat1hit++;
+        } else if (realgrid[coordinateX][coordinateY]== 7) {
             printf("\nVous avez déjà endommagé cette partie du navire!\n");
             attempts++;
         }
-
-        if (realgrid[ship1p1x][ship1p1y] == 7 && realgrid[ship1p2x][ship1p2y] == 7) {
+        if (boat1hit==2) {
             ship1sunk = true;
-            realgrid[ship1p1x][ship1p1y] = 8;
-            realgrid[ship1p2x][ship1p2y] = 8;
-            Mapgen();
-            printf("\nVous avez coulé un navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship1p1x][ship1p1y] && ship1sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship1p2x][ship1p2y] && ship1sunk == true) {
+            for(int i=0;i<10;i++){
+                for (int j = 0; j < 10; ++j) {
+                    if (realgrid[i][j] == 7) {
+                        realgrid[i][j] = 12;
+                    }
+                }
+                    Mapgen();
+                    printf("\nVous avez coulé un navire!\n");
+                    logtype=6;
+                    Log();
+                    attempts++;
+                }
+            } else if (realgrid[coordinateX][coordinateY] == 12) {
             printf("\nVous avez déjà coulé ce navire!\n");
             attempts++;
         }
 
 //Mechanics ship2
-        if (realgrid[coordinateX][coordinateY] == realgrid[ship2p1x][ship2p1y] && realgrid[ship2p1x][ship2p1y] == 2) {
-            realgrid[ship2p1x][ship2p1y] = 7;
+        if (realgrid[coordinateX][coordinateY]== 2) {
+            realgrid[coordinateX][coordinateY] = 8;
             Mapgen();
             printf("\nTouché!\n");
+            logtype=4;
+            Log();
             attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship2p2x][ship2p2y] &&
-                   realgrid[ship2p2x][ship2p2y] == 2) {
-            realgrid[ship2p2x][ship2p2y] = 7;
-            Mapgen();
-            printf("\nTouché!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship2p3x][ship2p3y] &&
-                   realgrid[ship2p3x][ship2p3y] == 2) {
-            realgrid[ship2p3x][ship2p3y] = 7;
-            Mapgen();
-            printf("\nTouché!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship2p1x][ship2p1y] &&
-                   realgrid[ship2p1x][ship2p1y] == 7 && ship2sunk == false) {
-            printf("\nVous avez déjà endommagé cette partie du navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship2p2x][ship2p2y] &&
-                   realgrid[ship2p2x][ship2p2y] == 7 && ship2sunk == false) {
-            printf("\nVous avez déjà endommagé cette partie du navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship2p3x][ship2p3y] &&
-                   realgrid[ship2p3x][ship2p3y] == 7 && ship2sunk == false) {
+            boat2hit++;
+        } else if (realgrid[coordinateX][coordinateY]== 8) {
             printf("\nVous avez déjà endommagé cette partie du navire!\n");
             attempts++;
         }
-        if (realgrid[ship2p1x][ship2p1y] == 7 && realgrid[ship2p2x][ship2p2y] == 7 &&
-            realgrid[ship2p3x][ship2p3y] == 7) {
+        if (boat2hit==3) {
             ship2sunk = true;
-            realgrid[ship2p1x][ship2p1y] = 8;
-            realgrid[ship2p2x][ship2p2y] = 8;
-            realgrid[ship2p3x][ship2p3y] = 8;
-            Mapgen();
-            printf("\nVous avez coulé un navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship2p1x][ship2p1y] &&
-                   realgrid[ship2p1x][ship2p1y] == 8 && ship2sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship2p2x][ship2p2y] &&
-                   realgrid[ship2p2x][ship2p2y] == 8 && ship2sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship2p3x][ship2p3y] &&
-                   realgrid[ship2p3x][ship2p3y] == 8 && ship2sunk == true) {
+            for(int i=0;i<10;i++) {
+                for (int j = 0; j < 10; ++j) {
+                    if (realgrid[i][j] == 8) {
+                        realgrid[i][j] = 13;
+                    }
+                }
+                Mapgen();
+                printf("\nVous avez coulé un navire!\n");
+                logtype = 6;
+                Log();
+                attempts++;
+            }
+        } else if (realgrid[coordinateX][coordinateY]== 13) {
             printf("\nVous avez déjà coulé ce navire!\n");
             attempts++;
         }
 
 
 //Mechanics ship3
-        if (realgrid[coordinateX][coordinateY] == realgrid[ship3p1x][ship3p1y] &&
-                 realgrid[ship3p1x][ship3p1y] == 3) {
-            realgrid[ship3p1x][ship3p1y] = 7;
+        if (realgrid[coordinateX][coordinateY]== 3) {
+            realgrid[coordinateX][coordinateY] = 9;
             Mapgen();
             printf("\nTouché!\n");
+            logtype=4;
+            Log();
             attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship3p2x][ship3p2y] &&
-                   realgrid[ship3p2x][ship3p2y] == 3) {
-            realgrid[ship3p2x][ship3p2y] = 7;
-            Mapgen();
-            printf("\nTouché!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship3p3x][ship3p3y] &&
-                   realgrid[ship3p3x][ship3p3y] == 3) {
-            realgrid[ship3p3x][ship3p3y] = 7;
-            Mapgen();
-            printf("\nTouché!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship3p4x][ship3p4y] &&
-                   realgrid[ship3p4x][ship3p4y] == 3) {
-            realgrid[ship3p4x][ship3p4y] = 7;
-            Mapgen();
-            printf("\nTouché!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship3p1x][ship3p1y] &&
-                   realgrid[ship3p1x][ship3p1y] == 7 && ship3sunk == false) {
-            printf("\nVous avez déjà endommagé cette partie du navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship3p2x][ship3p2y] &&
-                   realgrid[ship3p2x][ship3p2y] == 7 && ship3sunk == false) {
-            printf("\nVous avez déjà endommagé cette partie du navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship3p1x][ship3p1y] &&
-                   realgrid[ship3p3x][ship3p3y] == 7 && ship3sunk == false) {
-            printf("\nVous avez déjà endommagé cette partie du navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship3p1x][ship3p1y] &&
-                   realgrid[ship3p4x][ship3p4y] == 7 && ship3sunk == false) {
+            boat3hit++;
+        } else if (realgrid[coordinateX][coordinateY]== 9) {
             printf("\nVous avez déjà endommagé cette partie du navire!\n");
             attempts++;
         }
-        if (realgrid[ship3p1x][ship3p1y] == 7 && realgrid[ship3p2x][ship3p2y] == 7 &&
-            realgrid[ship3p3x][ship3p3y] == 7 && realgrid[ship3p4x][ship3p4y] == 7) {
+        if (boat3hit==4) {
             ship3sunk = true;
-            realgrid[ship3p1x][ship3p1y] = 8;
-            realgrid[ship3p2x][ship3p2y] = 8;
-            realgrid[ship3p3x][ship3p3y] = 8;
-            realgrid[ship3p4x][ship3p4y] = 8;
-            Mapgen();
-            printf("\nVous avez coulé un navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship3p1x][ship3p1y] &&
-                   realgrid[ship3p1x][ship3p1y] == 8 && ship3sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship3p2x][ship3p2y] &&
-                   realgrid[ship3p2x][ship3p2y] == 8 && ship3sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship3p3x][ship3p3y] &&
-                   realgrid[ship3p3x][ship3p3y] == 8 && ship3sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship3p4x][ship3p4y] &&
-                   realgrid[ship3p4x][ship3p4y] == 8 && ship3sunk == true) {
+            for(int i=0;i<10;i++) {
+                for (int j = 0; j < 10; ++j) {
+                    if (realgrid[i][j] == 9) {
+                        realgrid[i][j] = 14;
+                    }
+                }
+                Mapgen();
+                printf("\nVous avez coulé un navire!\n");
+                logtype = 6;
+                Log();
+                attempts++;
+            }
+        } else if (realgrid[coordinateX][coordinateY]== 14) {
             printf("\nVous avez déjà coulé ce navire!\n");
             attempts++;
         }
 
 //Mechanics ship4
-        if (realgrid[coordinateX][coordinateY] == realgrid[ship4p1x][ship4p1y] &&
-                 realgrid[ship4p1x][ship4p1y] == 4) {
-            realgrid[ship4p1x][ship4p1y] = 7;
+        if (realgrid[coordinateX][coordinateY]== 4) {
+            realgrid[coordinateX][coordinateY] = 10;
             Mapgen();
             printf("\nTouché!\n");
+            logtype=4;
+            Log();
             attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p2x][ship4p2y] &&
-                   realgrid[ship4p2x][ship4p2y] == 4) {
-            realgrid[ship4p2x][ship4p2y] = 7;
-            Mapgen();
-            printf("\nTouché!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p3x][ship4p3y] &&
-                   realgrid[ship4p3x][ship4p3y] == 4) {
-            realgrid[ship4p3x][ship4p3y] = 7;
-            Mapgen();
-            printf("\nTouché!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p4x][ship4p4y] &&
-                   realgrid[ship4p4x][ship4p4y] == 4) {
-            realgrid[ship4p4x][ship4p4y] = 7;
-            Mapgen();
-            printf("\nTouché!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p5x][ship4p5y] &&
-                   realgrid[ship4p5x][ship4p5y] == 4) {
-            realgrid[ship4p5x][ship4p5y] = 7;
-            Mapgen();
-            printf("\nTouché!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p1x][ship4p1y] &&
-                   realgrid[ship4p1x][ship4p1y] == 7 && ship4sunk == false) {
-            printf("\nVous avez déjà endommagé cette partie du navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p2x][ship4p2y] &&
-                   realgrid[ship4p2x][ship4p2y] == 7 && ship4sunk == false) {
-            printf("\nVous avez déjà endommagé cette partie du navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p3x][ship4p3y] &&
-                   realgrid[ship4p3x][ship4p3y] == 7 && ship4sunk == false) {
-            printf("\nVous avez déjà endommagé cette partie du navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p4x][ship4p4y] &&
-                   realgrid[ship4p4x][ship4p4y] == 7 && ship4sunk == false) {
-            printf("\nVous avez déjà endommagé cette partie du navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p5x][ship4p5y] &&
-                   realgrid[ship4p5x][ship4p5y] == 7 && ship4sunk == false) {
+            boat4hit++;
+        } else if (realgrid[coordinateX][coordinateY]== 10) {
             printf("\nVous avez déjà endommagé cette partie du navire!\n");
             attempts++;
         }
-        if (realgrid[ship4p1x][ship4p1y] == 7 && realgrid[ship4p2x][ship4p2y] == 7 &&
-            realgrid[ship4p3x][ship4p3y] == 7 && realgrid[ship4p4x][ship4p4y] == 7 &&
-            realgrid[ship4p5x][ship4p5y] == 7) {
+        if (boat4hit==5) {
             ship4sunk = true;
-            realgrid[ship4p1x][ship4p1y] = 8;
-            realgrid[ship4p2x][ship4p2y] = 8;
-            realgrid[ship4p3x][ship4p3y] = 8;
-            realgrid[ship4p4x][ship4p4y] = 8;
-            realgrid[ship4p5x][ship4p5y] = 8;
-            Mapgen();
-            printf("\nVous avez coulé un navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p1x][ship4p1y] &&
-                   realgrid[ship4p1x][ship4p1y] == 8 && ship4sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p2x][ship4p2y] &&
-                   realgrid[ship4p2x][ship4p2y] == 8 && ship4sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p3x][ship4p3y] &&
-                   realgrid[ship4p3x][ship4p3y] == 8 && ship4sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p4x][ship4p4y] &&
-                   realgrid[ship4p4x][ship4p4y] == 8 && ship4sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship4p5x][ship4p5y] &&
-                   realgrid[ship4p5x][ship4p5y] == 8 && ship4sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        }
+            for(int i=0;i<10;i++) {
+                for (int j = 0; j < 10; ++j) {
+                    if (realgrid[i][j] == 10) {
+                        realgrid[i][j] = 15;
+                    }
+                }
+                Mapgen();
+                printf("\nVous avez coulé un navire!\n");
+                logtype = 6;
+                Log();
+                attempts++;
+            }
+                } else if (realgrid[coordinateX][coordinateY] == 15) {
+                    printf("\nVous avez déjà coulé ce navire!\n");
+                    attempts++;
+                }
 
 //Mechanics ship5
-        if (realgrid[coordinateX][coordinateY] == realgrid[ship5p1x][ship5p1y] && realgrid[ship5p1x][ship5p1y] == 5) {
-            realgrid[ship5p1x][ship5p1y] = 7;
-            Mapgen();
-            printf("\nTouché!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship5p2x][ship5p2y] &&
-                   realgrid[ship5p2x][ship5p2y] == 5) {
-            realgrid[ship5p2x][ship5p2y] = 7;
-            Mapgen();
-            printf("\nTouché!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship5p1x][ship5p1y] &&
-                   realgrid[ship5p1x][ship5p1y] == 7 && ship5sunk == false) {
-            printf("\nVous avez déjà endommagé cette partie du navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship5p2x][ship5p2y] &&
-                   realgrid[ship5p2x][ship5p2y] == 7 && ship5sunk == false) {
-            printf("\nVous avez déjà endommagé cette partie du navire!\n");
-            attempts++;
-        }
-        if (realgrid[ship5p1x][ship5p1y] == 7 && realgrid[ship5p2x][ship5p2y] == 7) {
-            ship5sunk = true;
-            realgrid[ship5p1x][ship5p1y] = 8;
-            realgrid[ship5p2x][ship5p2y] = 8;
-            Mapgen();
-            printf("\nVous avez coulé un navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship5p1x][ship5p1y] &&
-                   realgrid[ship5p1x][ship5p1y] == 8 && ship5sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        } else if (realgrid[coordinateX][coordinateY] == realgrid[ship5p2x][ship5p2y] &&
-                   realgrid[ship5p2x][ship5p2y] == 8 && ship5sunk == true) {
-            printf("\nVous avez déjà coulé ce navire!\n");
-            attempts++;
-        }
+                if (realgrid[coordinateX][coordinateY] == 5) {
+                    realgrid[coordinateX][coordinateY] = 11;
+                    Mapgen();
+                    printf("\nTouché!\n");
+                    logtype = 4;
+                    Log();
+                    attempts++;
+                    boat5hit++;
+                } else if (realgrid[coordinateX][coordinateY] == 11) {
+                    printf("\nVous avez déjà endommagé cette partie du navire!\n");
+                    attempts++;
+                }
+                if (boat5hit == 2) {
+                    ship5sunk = true;
+                    for (int i = 0; i < 10; i++) {
+                        for (int j = 0; j < 10; ++j) {
+                            if (realgrid[i][j] == 11) {
+                                realgrid[i][j] = 16;
+                            }
+                        }
+                        Mapgen();
+                        printf("\nVous avez coulé un navire!\n");
+                        logtype = 6;
+                        Log();
+                        attempts++;
+                    }
+                        } else if (realgrid[coordinateX][coordinateY] == 15) {
+                            printf("\nVous avez déjà coulé ce navire!\n");
+                            attempts++;
+                        }
 
 //Verification that all ships are sunk
-        if (ship1sunk == true && ship2sunk == true && ship3sunk == true && ship4sunk == true && ship5sunk == true) {
-            allshipsunk = true;
-        }
+                        if (ship1sunk == true && ship2sunk == true && ship3sunk == true && ship4sunk == true &&
+                            ship5sunk == true) {
+                            allshipsunk = true;
+                        }
 
-    } while (allshipsunk != true);
-    printf("\nVous avez gagné !  (%d tentatives)\n", attempts);
-    Writescore();
-    emptyBuffer();
-    printf("\nDésirez-vous retourner au menu principal?     (1=Oui 0=Non)\n");
-}
-
+                    }
+                    while (allshipsunk != true);
+                    printf("\nVous avez gagné !  (%d tentatives)\n", attempts);
+                    logtype = 7;
+                    Log();
+                    Writescore();
+                    emptyBuffer();
+                    printf("\nDésirez-vous retourner au menu principal?     (1=Oui 0=Non)\n");
+                }
+/** \brief Init - This function resets the booleans and the score/attempts
+ *
+ *
+ */
 void Init() {
 
     ship1sunk = false;
@@ -579,28 +544,7 @@ void Init() {
     ship4sunk = false;
     ship5sunk = false;
     allshipsunk = false;
-
-    realgrid[ship1p1x][ship1p1y] = 1;
-    realgrid[ship1p2x][ship1p2y] = 1;
-
-    realgrid[ship2p1x][ship2p1y] = 2;
-    realgrid[ship2p2x][ship2p2y] = 2;
-    realgrid[ship2p3x][ship2p3y] = 2;
-
-    realgrid[ship3p1x][ship3p1y] = 3;
-    realgrid[ship3p2x][ship3p2y] = 3;
-    realgrid[ship3p3x][ship3p3y] = 3;
-    realgrid[ship3p4x][ship3p4y] = 3;
-
-    realgrid[ship4p1x][ship4p1y] = 4;
-    realgrid[ship4p2x][ship4p2y] = 4;
-    realgrid[ship4p3x][ship4p3y] = 4;
-    realgrid[ship4p4x][ship4p4y] = 4;
-    realgrid[ship4p5x][ship4p5y] = 4;
-
-    realgrid[ship5p1x][ship5p1y] = 5;
-    realgrid[ship5p2x][ship5p2y] = 5;
-
+    attempts=0;
     score=0;
 }
 
@@ -611,11 +555,11 @@ void Init() {
 void Help() {                                //show rules and possibly tips
 
     printf("\nAIDE\n");
-    printf("\nIl s'agit d'un simple jeu de bataille navale, vous jouez en entrant des coordonnées dans la console afin de couler les bateaux ennemis.");
-    printf("\nPour couler un bateau il est nécessaire de toucher toutes ses parties.");
-    printf("\nIl y a 5 bateaux et le jeu se termine lorsqu'ils sont tous coulés.");
-    printf("\n'~' = Eau || '=' = Tire raté || '*' = Touché || 'X' = Coulé");
-    printf("(Menu=1  Quitter=0)\n");
+    printf("Il s'agit d'un simple jeu de bataille navale, vous jouez en entrant des coordonnées dans la console afin de couler les bateaux ennemis.\n");
+    printf("Pour couler un bateau il est nécessaire de toucher toutes ses parties.\n");
+    printf("Il y a 5 bateaux et le jeu se termine lorsqu'ils sont tous coulés.\n");
+    printf("'~' = Eau || '=' = Tire raté || '*' = Touché || 'X' = Coulé\n");
+    printf("\n(Menu=1  Quitter=0)\n");
 }
 
 /** \brief main - This function is the main menu and base of the program
@@ -631,14 +575,17 @@ int main() {                                //menu
 //do while that allows the user to go back to the menu or exit the game
     do {
         Init();
+        logtype=1;
+        Log();
         printf("\nBataille Navale\n");
 
         printf("1.Jouer\n");
         printf("2.Aide\n");
         printf("3.Score\n");
         printf("4.Effacer les scores\n");
-        printf("5.Afficher le Log\n");
-        printf("5.Quitter\n");
+        printf("5.Afficher les Logs\n");
+        printf("6.Effacer les logs\n");
+        printf("7.Quitter\n");
 
 
         scanf("%d", &usermenuchoice);
@@ -648,8 +595,11 @@ int main() {                                //menu
             case 1:
                 emptyBuffer();
                 Username();
+                logtype=2;
+                Log();
                 Init();
                 Mapgen();
+                Mapselector();
                 Play();
                 scanf("%d", &exitloop);
 
@@ -673,7 +623,7 @@ int main() {                                //menu
             case 3:
                 emptyBuffer();
                 Showscore();
-                printf("Voulez-vous retourner au menu?  (1=Oui  0=Non)\n");
+                printf("Voulez-vous retourner au menu?  (Menu=1  Quitter=0)\n");
                 scanf("%d", &exitloop);
 
                 while (exitloop < 0 || exitloop > 1) {
@@ -684,14 +634,14 @@ int main() {                                //menu
                 break;
             case 4:
                 emptyBuffer();
-                Deletescore();
+                Clearscore();
                 printf("Tous les scores ont été effacés!\n");
                 exitloop=1;
                 break;
             case 5:
                 emptyBuffer();
-                Log();
-                printf("Voulez-vous retourner au menu? (1=Oui 0=Non)\n");
+                Showlog();
+                printf("Voulez-vous retourner au menu? (Menu=1 Quitter=0)\n");
                 scanf("%d", &exitloop);
 
                 while (exitloop < 0 || exitloop > 1) {
@@ -702,7 +652,13 @@ int main() {                                //menu
                 break;
             case 6:
                 emptyBuffer();
-                printf("Êtes-vous sûr de vouloir quitter? (1=Non 0=Oui)\n");
+                Clearlogs();
+                printf("Les logs ont été effacés!\n");
+                exitloop=1;
+                break;
+            case 7:
+                emptyBuffer();
+                printf("Êtes-vous sûr de vouloir quitter? (Menu=1  Quitter=0)\n");
                 scanf("%d", &exitloop);
 
                 while (exitloop < 0 || exitloop > 1) {
@@ -725,6 +681,7 @@ int main() {                                //menu
 
     } while (exitloop != 0);
 
-
+    logtype=8;
+    Log();
     return 0;
 }

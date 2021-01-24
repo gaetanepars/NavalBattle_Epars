@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['emptybuffer_109',['emptyBuffer',['../main_8c.html#ae1793ab69ec199b96bae50c64468377b',1,'main.c']]]
+  ['log_5',['Log',['../main_8c.html#a195e946d62cbb679737010f3ff1ebd81',1,'main.c']]]
 ];
